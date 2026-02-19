@@ -1,0 +1,19 @@
+# Thai OCR - Hugging Face Spaces Requirements
+
+# Gradio UI (pinned compatible versions)
+gradio==5.9.1
+huggingface-hub==0.27.1
+pydantic==2.10.6
+
+# Deep Learning
+torch>=2.0.0
+transformers>=4.30.0
+
+# Tokenizer
+sentencepiece>=0.1.96
+
+# Image Processing
+Pillow>=9.0.0
+
+# HTTP Requests
+requests>=2.28.0

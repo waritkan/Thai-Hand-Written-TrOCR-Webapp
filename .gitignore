@@ -1,0 +1,43 @@
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Large model files (too big for GitHub)
+Model/best_model.pt
+Model_Implement/thai_corpus.txt
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude specific
+.claude/
+
+# Temporary/test files
+best_samples/
+test_images/
+nul
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+thai_handwritten_OCR/

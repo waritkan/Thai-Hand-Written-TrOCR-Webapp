@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thai OCR - ระบบอ่านลายมือภาษาไทย</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* CMU Purple Theme */
+            --primary-dark: #4A154B;
+            --primary: #6B2574;
+            --primary-light: #8B3A8E;
+            --primary-lighter: #A855A8;
+            --accent: #9B4D96;
+            --accent-light: #D4A5D1;
+            --gold: #C9A227;
+            --gold-light: #E8D48B;
+
+            /* Backgrounds */
+            --bg-dark: #1A0A1F;
+            --bg-gradient-1: #2D1233;
+            --bg-gradient-2: #3D1A45;
+
+            /* Cards & UI */
+            --card-bg: rgba(255, 255, 255, 0.97);
+            --text-dark: #2D1B36;
+            --text-light: #F8F4F9;
+            --text-muted: #7A6B7E;
+            --border: #E8DFE9;
+            --success: #10B981;
+            --error: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', 'Kanit', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-gradient-1) 50%, var(--bg-gradient-2) 100%);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* Background Animation */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-pattern::before {
+            content: '';
+            position: absolute;
+            width: 250%;
+            height: 250%;
+            top: -75%;
+            left: -75%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(107, 37, 116, 0.4) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(155, 77, 150, 0.3) 0%, transparent 35%),
+                radial-gradient(circle at 50% 50%, rgba(201, 162, 39, 0.1) 0%, transparent 50%);
+            animation: bgFloat 25s ease-in-out infinite;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-3%, 3%) rotate(3deg); }
+            66% { transform: translate(3%, -3%) rotate(-3deg); }
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 2rem 1rem 1.5rem;
+        }
+
+        .university-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            padding: 1.5rem 2rem;
+            background: transparent;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .faculty-logo {
+            height: 90px;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+            transition: transform 0.3s ease;
+        }
+
+        .faculty-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .dsrc-logo {
+            height: 90px;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+            transition: transform 0.3s ease;
+        }
+
+        .dsrc-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .project-title-section {
+            margin-top: 1rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h1 {
+            font-family: 'Kanit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--gold-light) 50%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.3rem;
+        }
+
+        .subtitle {
+            color: var(--accent-light);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        .subtitle-en {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 300;
+            margin-top: 0.2rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(201, 162, 39, 0.2);
+            border: 1px solid var(--gold);
+            color: var(--gold-light);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        /* Team Section */
+        .team-section {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .team-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 700px) {
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .team-member {
+            text-align: center;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, rgba(107, 37, 116, 0.05), rgba(155, 77, 150, 0.08));
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .team-member:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(107, 37, 116, 0.15);
+        }
+
+        .member-id {
+            font-size: 0.7rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .member-name {
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1.5rem 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 1.75rem;
+            margin-bottom: 1.25rem;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                0 8px 25px rgba(107, 37, 116, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.35),
+                0 12px 30px rgba(107, 37, 116, 0.25);
+        }
+
+        .card-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .card-title i {
+            color: var(--accent);
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2.5px dashed var(--border);
+            border-radius: 14px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(107, 37, 116, 0.02), rgba(155, 77, 150, 0.04));
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-light);
+            background: linear-gradient(135deg, rgba(107, 37, 116, 0.05), rgba(155, 77, 150, 0.08));
+        }
+
+        .upload-area.dragover {
+            border-color: var(--gold);
+            background: linear-gradient(135deg, rgba(201, 162, 39, 0.1), rgba(155, 77, 150, 0.1));
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-light);
+            margin-bottom: 0.75rem;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            transform: scale(1.1);
+        }
+
+        .upload-text {
+            color: var(--text-dark);
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .upload-hint {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* URL Section */
+        .url-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1.5px solid var(--border);
+        }
+
+        .url-label {
+            display: block;
+            color: var(--text-dark);
+            font-weight: 500;
+            margin-bottom: 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 0.85rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #fff;
+            color: var(--text-dark);
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(107, 37, 116, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.85rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            box-shadow: 0 4px 15px rgba(107, 37, 116, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 37, 116, 0.5);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), #D4AF37);
+            color: #1A0A1F;
+            box-shadow: 0 4px 15px rgba(201, 162, 39, 0.4);
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(201, 162, 39, 0.5);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.55rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* Preview Section */
+        .preview-section {
+            display: none;
+            margin-top: 1.5rem;
+        }
+
+        .preview-section.active {
+            display: block;
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .preview-container {
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+        }
+
+        @media (max-width: 700px) {
+            .preview-container {
+                flex-direction: column;
+            }
+        }
+
+        .preview-image-wrapper {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            background: #fafafa;
+        }
+
+        .preview-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-info {
+            background: linear-gradient(135deg, rgba(107, 37, 116, 0.05), rgba(155, 77, 150, 0.08));
+            padding: 0.9rem;
+            border-radius: 10px;
+            margin-bottom: 0.9rem;
+        }
+
+        .file-info p {
+            color: var(--text-dark);
+            font-size: 0.85rem;
+            margin-bottom: 0.35rem;
+            word-break: break-all;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .file-info p:last-child {
+            margin-bottom: 0;
+        }
+
+        .file-info strong {
+            color: var(--primary);
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 45px;
+            height: 45px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 0.75rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .loading-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(107, 37, 116, 0.1);
+            color: var(--primary);
+            padding: 0.35rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 0.6rem;
+        }
+
+        .loading-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: blink 1.2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Error */
+        .error-message {
+            display: none;
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid var(--error);
+            border-radius: 10px;
+            padding: 0.85rem 1.1rem;
+            color: var(--error);
+            margin-top: 0.9rem;
+            font-size: 0.9rem;
+        }
+
+        .error-message.active {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        /* Result */
+        .result-section {
+            display: none;
+        }
+
+        .result-section.active {
+            display: block;
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, rgba(107, 37, 116, 0.04), rgba(201, 162, 39, 0.06));
+            border: 2px solid var(--primary-light);
+            border-radius: 14px;
+            padding: 1.25rem;
+            position: relative;
+        }
+
+        .result-label {
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.2rem 0.85rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .result-text {
+            font-size: 1.35rem;
+            color: var(--text-dark);
+            font-family: 'Sarabun', sans-serif;
+            line-height: 1.9;
+            min-height: 50px;
+            word-wrap: break-word;
+            margin-top: 0.5rem;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .success-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--accent-light);
+            font-size: 0.85rem;
+        }
+
+        footer strong {
+            color: var(--gold-light);
+        }
+
+        /* Sample Images */
+        .sample-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1.5px solid var(--border);
+        }
+
+        .sample-label {
+            display: block;
+            color: var(--text-dark);
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .sample-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .sample-item {
+            cursor: pointer;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .sample-item:hover {
+            border-color: var(--primary-light);
+            transform: scale(1.03);
+            box-shadow: 0 4px 15px rgba(107, 37, 116, 0.2);
+        }
+
+        .sample-item.selected {
+            border-color: var(--gold);
+            box-shadow: 0 4px 15px rgba(201, 162, 39, 0.3);
+        }
+
+        .sample-item img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+        }
+
+        .sample-item-label {
+            text-align: center;
+            padding: 0.4rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: linear-gradient(135deg, rgba(107, 37, 116, 0.05), rgba(155, 77, 150, 0.08));
+        }
+
+        @media (max-width: 500px) {
+            .sample-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.7rem;
+            }
+
+            .card {
+                padding: 1.25rem;
+            }
+
+            .url-input-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+
+    <header>
+        <div class="university-header">
+            <img src="/static/faculty_science_logo.png" alt="Faculty of Science Logo" class="faculty-logo">
+            <img src="/static/dsrc_logo.png" alt="DSRC Logo" class="dsrc-logo">
+        </div>
+
+        <div class="project-title-section">
+            <h1>Thai Handwriting OCR</h1>
+            <p class="subtitle">ระบบรู้จำลายมือเขียนภาษาไทยด้วยปัญญาประดิษฐ์</p>
+            <p class="subtitle-en">Thai Handwriting Recognition using TrOCR Deep Learning</p>
+            <div class="badge">
+                <i class="fas fa-microchip"></i>
+                Powered by TrOCR + Thai SentencePiece
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Team Card -->
+        <div class="team-section">
+            <h3 class="team-title">
+                <i class="fas fa-users"></i>
+                ทีมพัฒนา | Development Team
+            </h3>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="member-id">650510707</div>
+                    <div class="member-name">ธิชัยยุทธ์ ธนะภาษี</div>
+                </div>
+                <div class="team-member">
+                    <div class="member-id">650510731</div>
+                    <div class="member-name">ประกายดาว พลานามัย</div>
+                </div>
+                <div class="team-member">
+                    <div class="member-id">650510732</div>
+                    <div class="member-name">พงศพัศ แสงแก้ว</div>
+                </div>
+                <div class="team-member">
+                    <div class="member-id">650510735</div>
+                    <div class="member-name">วริศ ศิริโฆษิตยางกูร</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Card -->
+        <div class="card">
+            <h2 class="card-title">
+                <i class="fas fa-image"></i>
+                Upload Image
+            </h2>
+
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <p class="upload-text">Drag & drop your image here</p>
+                <p class="upload-hint">or click to browse (PNG, JPG, GIF, BMP, WebP)</p>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+
+            <div class="url-section">
+                <label class="url-label">
+                    <i class="fas fa-link"></i> Or paste image URL
+                </label>
+                <div class="url-input-group">
+                    <input type="url" id="urlInput" class="url-input" placeholder="https://example.com/image.jpg">
+                    <button class="btn btn-primary" id="urlBtn">
+                        <i class="fas fa-search"></i>
+                        Load URL
+                    </button>
+                </div>
+            </div>
+
+            <div class="sample-section">
+                <label class="sample-label">
+                    <i class="fas fa-images"></i> Or try sample images
+                </label>
+                <div class="sample-grid">
+                    <div class="sample-item" data-sample="/static/sample_images/sample1.jpg">
+                        <img src="/static/sample_images/sample1.jpg" alt="Sample 1">
+                        <div class="sample-item-label">Sample 1</div>
+                    </div>
+                    <div class="sample-item" data-sample="/static/sample_images/sample2.jpg">
+                        <img src="/static/sample_images/sample2.jpg" alt="Sample 2">
+                        <div class="sample-item-label">Sample 2</div>
+                    </div>
+                    <div class="sample-item" data-sample="/static/sample_images/sample3.jpg">
+                        <img src="/static/sample_images/sample3.jpg" alt="Sample 3">
+                        <div class="sample-item-label">Sample 3</div>
+                    </div>
+                    <div class="sample-item" data-sample="/static/sample_images/sample4.jpg">
+                        <img src="/static/sample_images/sample4.jpg" alt="Sample 4">
+                        <div class="sample-item-label">Sample 4</div>
+                    </div>
+                    <div class="sample-item" data-sample="/static/sample_images/sample5.jpg">
+                        <img src="/static/sample_images/sample5.jpg" alt="Sample 5">
+                        <div class="sample-item-label">Sample 5</div>
+                    </div>
+                    <div class="sample-item" data-sample="/static/sample_images/sample6.jpg">
+                        <img src="/static/sample_images/sample6.jpg" alt="Sample 6">
+                        <div class="sample-item-label">Sample 6</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section" id="previewSection">
+                <h3 class="card-title" style="margin-top: 1rem;">
+                    <i class="fas fa-eye"></i>
+                    Preview
+                </h3>
+                <div class="preview-container">
+                    <div class="preview-image-wrapper">
+                        <img id="previewImage" class="preview-image" src="" alt="Preview">
+                    </div>
+                    <div class="preview-info">
+                        <div class="file-info" id="fileInfo">
+                            <p><strong>File:</strong> <span id="fileName">-</span></p>
+                            <p><strong>Size:</strong> <span id="fileSize">-</span></p>
+                            <p><strong>Type:</strong> <span id="fileType">-</span></p>
+                        </div>
+                        <button class="btn btn-gold" id="processBtn">
+                            <i class="fas fa-magic"></i>
+                            Start Recognition
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading" id="loadingState">
+                <div class="spinner"></div>
+                <p class="loading-text">Processing image...</p>
+                <div class="loading-badge">
+                    <span class="loading-dot"></span>
+                    AI is reading text
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText"></span>
+            </div>
+        </div>
+
+        <!-- Result Card -->
+        <div class="card result-section" id="resultSection">
+            <h2 class="card-title">
+                <i class="fas fa-file-alt"></i>
+                Recognition Result
+            </h2>
+
+            <div class="result-box">
+                <span class="result-label">
+                    <i class="fas fa-check-circle"></i>
+                    Recognized Text
+                </span>
+                <p class="result-text" id="resultText"></p>
+            </div>
+
+            <div class="result-actions">
+                <button class="btn btn-secondary btn-sm" id="copyBtn">
+                    <i class="fas fa-copy"></i>
+                    Copy Text
+                </button>
+                <button class="btn btn-secondary btn-sm" id="newImageBtn">
+                    <i class="fas fa-plus"></i>
+                    New Image
+                </button>
+            </div>
+
+            <div class="success-badge">
+                <i class="fas fa-check-circle"></i>
+                Successfully processed
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            <strong>Senior Project 2025</strong>
+            <br>
+            Data Science, Faculty of Science
+            <br>
+            <small>Chiang Mai University | Built with PyTorch & Transformers</small>
+        </p>
+    </footer>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const urlInput = document.getElementById('urlInput');
+        const urlBtn = document.getElementById('urlBtn');
+        const previewSection = document.getElementById('previewSection');
+        const previewImage = document.getElementById('previewImage');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const fileType = document.getElementById('fileType');
+        const processBtn = document.getElementById('processBtn');
+        const loadingState = document.getElementById('loadingState');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const resultSection = document.getElementById('resultSection');
+        const resultText = document.getElementById('resultText');
+        const copyBtn = document.getElementById('copyBtn');
+        const newImageBtn = document.getElementById('newImageBtn');
+
+        let currentFile = null;
+        let currentUrl = null;
+        let currentSample = null;
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.add('active');
+            setTimeout(() => errorMessage.classList.remove('active'), 5000);
+        }
+
+        function hideError() {
+            errorMessage.classList.remove('active');
+        }
+
+        function showLoading() {
+            loadingState.classList.add('active');
+            processBtn.disabled = true;
+            urlBtn.disabled = true;
+        }
+
+        function hideLoading() {
+            loadingState.classList.remove('active');
+            processBtn.disabled = false;
+            urlBtn.disabled = false;
+        }
+
+        function showResult(text) {
+            resultText.textContent = text;
+            resultSection.classList.add('active');
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function resetUI() {
+            previewSection.classList.remove('active');
+            resultSection.classList.remove('active');
+            hideError();
+            hideLoading();
+            currentFile = null;
+            currentUrl = null;
+            currentSample = null;
+            urlInput.value = '';
+            document.querySelectorAll('.sample-item').forEach(i => i.classList.remove('selected'));
+        }
+
+        // File handling
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', e => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+        uploadArea.addEventListener('drop', e => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', e => {
+            if (e.target.files.length > 0) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            const validTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/bmp', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showError('Invalid file type. Use PNG, JPG, GIF, BMP or WebP');
+                return;
+            }
+            if (file.size > 16 * 1024 * 1024) {
+                showError('File too large (max 16MB)');
+                return;
+            }
+
+            hideError();
+            resultSection.classList.remove('active');
+            currentFile = file;
+            currentUrl = null;
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                previewImage.src = e.target.result;
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileType.textContent = file.type;
+                previewSection.classList.add('active');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // URL handling
+        urlBtn.addEventListener('click', () => {
+            const url = urlInput.value.trim();
+            if (!url) {
+                showError('Please enter image URL');
+                return;
+            }
+
+            try {
+                new URL(url);
+            } catch {
+                showError('Invalid URL');
+                return;
+            }
+
+            hideError();
+            resultSection.classList.remove('active');
+            currentUrl = url;
+            currentFile = null;
+
+            previewImage.src = url;
+            previewImage.onerror = () => {
+                showError('Cannot load image from URL');
+                previewSection.classList.remove('active');
+            };
+            previewImage.onload = () => {
+                fileName.textContent = url.split('/').pop() || 'Image from URL';
+                fileSize.textContent = '-';
+                fileType.textContent = 'URL Image';
+                previewSection.classList.add('active');
+            };
+        });
+
+        urlInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') urlBtn.click();
+        });
+
+        // Sample images handling
+        document.querySelectorAll('.sample-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const sampleUrl = item.dataset.sample;
+
+                // Remove selected from all
+                document.querySelectorAll('.sample-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+
+                hideError();
+                resultSection.classList.remove('active');
+                currentFile = null;
+                currentUrl = null;
+                currentSample = sampleUrl;
+
+                previewImage.src = sampleUrl;
+                fileName.textContent = sampleUrl.split('/').pop();
+                fileSize.textContent = 'Sample Image';
+                fileType.textContent = 'image/jpeg';
+                previewSection.classList.add('active');
+            });
+        });
+
+        // Process
+        processBtn.addEventListener('click', async () => {
+            hideError();
+            showLoading();
+
+            try {
+                let response;
+                if (currentFile) {
+                    const formData = new FormData();
+                    formData.append('file', currentFile);
+                    response = await fetch('/predict', { method: 'POST', body: formData });
+                } else if (currentUrl) {
+                    response = await fetch('/predict', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: currentUrl })
+                    });
+                } else if (currentSample) {
+                    response = await fetch('/predict', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sample: currentSample })
+                    });
+                } else {
+                    throw new Error('Please select an image first');
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    showResult(data.text);
+                } else {
+                    throw new Error(data.error || 'Processing failed');
+                }
+            } catch (error) {
+                showError(error.message || 'Connection error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Copy
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(resultText.textContent);
+                const original = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => copyBtn.innerHTML = original, 2000);
+            } catch {
+                showError('Cannot copy text');
+            }
+        });
+
+        newImageBtn.addEventListener('click', resetUI);
+    </script>
+</body>
+</html>

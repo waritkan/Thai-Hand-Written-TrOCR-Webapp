@@ -1,0 +1,9 @@
+{
+  "tokenizer_class": "ThaiTokenizer",
+  "model_type": "sentencepiece",
+  "vocab_size": 30000,
+  "pad_token": "<pad>",
+  "unk_token": "<unk>",
+  "bos_token": "<s>",
+  "eos_token": "</s>"
+}
