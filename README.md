@@ -24,6 +24,15 @@ A Thai handwriting recognition system built from scratch by **fine-tuning TrOCR*
 - Real-time OCR prediction
 - Deployed at [dsctrocr.college](https://dsctrocr.college)
 
+## Model Architecture
+
+![TrOCR Model Architecture](assets/TrOCR.png)
+
+The model consists of:
+- **Encoder (ViT)**: Vision Transformer for image feature extraction via patch embedding
+- **Decoder**: Transformer decoder with masked multi-head attention for autoregressive text generation
+- **Custom Tokenizer**: Thai SentencePiece tokenizer (30K vocab) for encoding/decoding Thai text
+
 ## Model Performance
 
 Tested on [bypkt/thai_handwritten_datasets](https://huggingface.co/datasets/bypkt/thai_handwritten_datasets)
